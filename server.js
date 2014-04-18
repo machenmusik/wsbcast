@@ -1,5 +1,10 @@
+var http = require('http');
+var svr = http.createServer(function(req,res) {
+  res.end('happy');
+}).listen(process.env.PORT || 8080);
+
 var WebSocketServer = require('ws').Server
-  , wss = new WebSocketServer({port: 8080});
+  , wss = new WebSocketServer({server: svr});
 
 wss.broadcast = function(data) {
     var notme = arguments[1];
