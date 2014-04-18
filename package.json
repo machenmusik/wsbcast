@@ -1,0 +1,17 @@
+{
+    "name": "wsbcast",
+    "version": "0.0.1",
+    "main": "server.js",
+    "dependencies": {
+	"ws": "0.4.x"
+    },
+    "no-dependencies": {
+        "log-timestamp": "0.0.4",
+	"knox": "0.8.9",
+	"nodetime": "0.8.14"
+    },
+    "engines": {
+        "node": "0.10.x",
+        "npm": "1.2.x"
+    }
+}
