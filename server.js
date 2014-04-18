@@ -19,3 +19,28 @@ wss.on('connection', function(ws) {
     wss.broadcast(message, ws);
   });
 });
+
+
+function startKeepAlive() {
+    setInterval(function() {
+        var options = {
+            host: process.env.HOST,
+            port: 80,
+            path: '/'
+        };
+        http.get(options, function(res) {
+            res.on('data', function(chunk) {
+                try {
+                    // optional logging... disable after it's working
+                    //console.log("KeepAlive RESPONSE: " + chunk);
+                } catch (err) {
+                    console.log(err.message);
+                }
+            });
+        }).on('error', function(err) {
+            console.log("Error: " + err.message);
+        });
+    }, 5 * 60 * 1000); // load every 5 minutes
+}
+
+startKeepAlive();
