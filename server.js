@@ -25,7 +25,7 @@ wss.on('connection', function(ws) {
 
   ws.on('close', function() {
     var theURL = ws.upgradeReq.url;
-    var i = self.clientMap[theURL].indexOf(client);
+    var i = self.clientMap[theURL].indexOf(ws);
     if (i != -1) {
       self.clientMap[theURL].splice(i, 1);
     }
