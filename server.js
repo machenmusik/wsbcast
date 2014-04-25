@@ -4,19 +4,36 @@ var svr = http.createServer(function(req,res) {
 }).listen(process.env.PORT || 8080);
 
 var WebSocketServer = require('ws').Server
-  , wss = new WebSocketServer({server: svr});
+  , wss = new WebSocketServer({server: svr, 
+    clientTracking:false}); // we're going to do our own
 
-wss.broadcast = function(data) {
-    var notme = arguments[1];
-    for(var i in this.clients)
-	if (this.clients[i] !== notme)
-            this.clients[i].send(data);
+wss.clientMap = {};
+
+wss.broadcast = function(data, ws) {
+    for(var i in this.clientMap[ws.upgradeReq.url])
+	if (this.clientMap[ws.upgradeReq.url][i] !== ws)
+            this.clientMap[ws.upgradeReq.url][i].send(data);
 };
 
 // use like this:
 wss.on('connection', function(ws) {
+  var self = this;
+
+  // make sure we know what URL was used
+  console.log(ws.upgradeReq.url);
+  if (typeof self.clientMap[ws.upgradeReq.url] === 'undefined')
+    self.clientMap[ws.upgradeReq.url] = []; // beware if races are possible
+  self.clientMap[ws.upgradeReq.url].push(ws); 
+
+  ws.on('close', function() {
+    var i = self.clientMap[ws.upgradeReq.url].indexOf(client);
+    if (i != -1) {
+      self.clientMap[ws.upgradeReq.url].splice(i, 1);
+    }
+  });
+
   ws.on('message', function(message) {
-    wss.broadcast(message, ws);
+    self.broadcast(message, ws);
   });
 });
 
