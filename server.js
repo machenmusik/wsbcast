@@ -1,11 +1,11 @@
 var http = require('http');
 var svr = http.createServer(function(req,res) {
-  res.end('happy');
+  res.end('hi');
 }).listen(process.env.PORT || 8080);
 
 var WebSocketServer = require('ws').Server
   , wss = new WebSocketServer({server: svr, 
-    clientTracking:false}); // we're going to do our own
+      clientTracking:false}); // we're going to do our own
 
 wss.clientMap = {};
 
@@ -15,20 +15,19 @@ wss.broadcast = function(data, ws) {
             this.clientMap[ws.upgradeReq.url][i].send(data);
 };
 
-// use like this:
 wss.on('connection', function(ws) {
   var self = this;
 
-  // make sure we know what URL was used
-  console.log(ws.upgradeReq.url);
-  if (typeof self.clientMap[ws.upgradeReq.url] === 'undefined')
-    self.clientMap[ws.upgradeReq.url] = []; // beware if races are possible
-  self.clientMap[ws.upgradeReq.url].push(ws); 
+  var theURL = ws.upgradeReq.url;
+  if (typeof self.clientMap[theURL] === 'undefined')
+    self.clientMap[theURL] = []; // beware if races are possible
+  self.clientMap[theURL].push(ws); 
 
   ws.on('close', function() {
-    var i = self.clientMap[ws.upgradeReq.url].indexOf(client);
+    var theURL = ws.upgradeReq.url;
+    var i = self.clientMap[theURL].indexOf(client);
     if (i != -1) {
-      self.clientMap[ws.upgradeReq.url].splice(i, 1);
+      self.clientMap[theURL].splice(i, 1);
     }
   });
 
