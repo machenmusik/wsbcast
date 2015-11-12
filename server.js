@@ -1,10 +1,30 @@
 var http = require('http');
+
+var wss;
 var svr = http.createServer(function(req,res) {
-  res.end('hi');
+  if (req.method === 'POST') {
+    var body = "";
+    req.on('data', function(data) {
+      body += data;
+      if (body.length > 1e6) {
+        body = "";
+        res.writeHead(413, {'Content-Type':'text/plain'}).end();
+        req.connection.destroy();
+      }
+    });
+    req.on('end', function() {
+      for(var i in wss.clientMap[req.url])
+        wss.clientMap[req.url][i].send(body);
+      res.end();
+    });
+  } else {
+    res.end('hi');
+  }
 }).listen(process.env.PORT || 8080);
 
-var WebSocketServer = require('ws').Server
-  , wss = new WebSocketServer({server: svr, 
+var WebSocketServer = require('ws').Server;
+
+wss = new WebSocketServer({server: svr, 
       clientTracking:false}); // we're going to do our own
 
 wss.clientMap = {};
